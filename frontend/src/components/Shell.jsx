@@ -1,0 +1,16 @@
+import { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { ArrowUpRight, Search, Plus, Wallet, Menu, X } from 'lucide-react';
+import { short } from '../lib/api';
+import { Btn } from './Kit';
+import { useWallet } from './WalletContext';
+import { FooterInformation } from './information/FooterInformation';
+
+export const Brand = () => <span className="brand">MART<span className="brand-mark"><i /><i /><i /></span></span>;
+export const Header = () => {
+  const [menu, setMenu] = useState(false), [search, setSearch] = useState('');
+  const { wallet, openWallet } = useWallet(); const navigate = useNavigate();
+  useEffect(() => { const showAddToken = () => navigate('/add-token'); window.addEventListener('mart:open-add-token', showAddToken); return () => window.removeEventListener('mart:open-add-token', showAddToken); }, [navigate]);
+  return <header className="header"><div className="nav-inner"><Link to="/" data-testid="brand-home" aria-label="MART home"><Brand /></Link><nav className="desktop-nav"><NavLink to="/explore" data-testid="nav-explore">Explore</NavLink><NavLink to="/events" data-testid="nav-events">Events</NavLink><NavLink to="/launch" data-testid="nav-launch">Launch<ArrowUpRight size={13} /></NavLink></nav><form className="nav-search" onSubmit={e => { e.preventDefault(); navigate(`/explore?q=${encodeURIComponent(search)}`); }}><Search size={16} /><input placeholder="Search tokens or address" value={search} onChange={e => setSearch(e.target.value)} data-testid="nav-search-input" aria-label="Search tokens" /><kbd>/</kbd></form><div className="nav-actions"><Link className="add-token-link" data-testid="add-token-button" to="/add-token"><Plus size={15} />Add Token</Link><Btn data-testid="connect-wallet-button" onClick={wallet ? () => navigate('/wallet') : openWallet}><Wallet size={16} /><span>{wallet ? short(wallet) : 'Connect Wallet'}</span></Btn><button className="mobile-menu" aria-label="Toggle navigation" data-testid="mobile-menu-toggle" onClick={() => setMenu(!menu)}>{menu ? <X /> : <Menu />}</button></div></div>{menu && <nav className="mobile-navigation">{[['Explore', '/explore'], ['Events', '/events'], ['Launch Token', '/launch'], ['My Wallet', '/wallet']].map(([label, path]) => <Link key={path} to={path} data-testid={`mobile-${label.toLowerCase().replaceAll(' ', '-')}`} onClick={() => setMenu(false)}>{label}<ArrowUpRight size={16} /></Link>)}<Link to="/add-token" data-testid="mobile-add-token" onClick={() => setMenu(false)}>+ Add Token<ArrowUpRight size={16} /></Link></nav>}</header>;
+};
+export const Footer = () => <footer className="footer"><div className="footer-main"><div><Link to="/" data-testid="footer-brand"><Brand /></Link><p>A market built around every token.</p></div><div className="footer-links"><Link to="/explore" data-testid="footer-explore">Explore tokens</Link><Link to="/events" data-testid="footer-events">Events</Link><Link to="/launch" data-testid="footer-launch">Launch a token<ArrowUpRight size={13} /></Link></div><span className="solana-powered"><span className="solana-mark">≋</span> Built on Solana</span></div><FooterInformation /><div className="footer-bottom"><span>© 2026 MART. Your token. Your ecosystem.</span><span>Non-custodial by design.<span className="live-dot" /></span></div></footer>;

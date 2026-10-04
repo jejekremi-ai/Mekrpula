@@ -1,0 +1,40 @@
+{
+  "summary": "Completed supplemental correction coverage requested after iteration_5: added and executed isolated backend tests for launch prepare/confirm persistence and authority-gated add-token agent flows, plus privacy checks for public AgentView. Ran focused UI fixture rendering checks (desktop+mobile) with TEST-ONLY route interception for long configured profile display and overflow validation. Confirmed prior iteration_5 '/token/FARTCOIN' finding was a test-spec misunderstanding: mint-only canonical routing is intentional, and /token/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump works.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_agent_supplemental_regression_iteration6.py",
+    "/app/test_reports/pytest/pytest_results_iteration6_backend.xml"
+  ],
+  "action_items": [
+    "No app-code fix required for '/token/FARTCOIN'; keep mint-only canonical identity in docs/tests.",
+    "Optionally remove or update stale legacy regression assumptions in /app/backend/tests/test_agent_storage_regression.py (it still expects an old default profile behavior).",
+    "If needed, add separate optional frontend test for launch prepare payload capture (agent included vs toggle-off null); this step was not executed in this run."
+  ],
+  "critical_code_review_comments": [
+    "launch.prepare correctly excludes agent from public metadata while storing agent_profile snapshot in launches.",
+    "launch.confirm enforces finalized transaction + exact message hash before add_hub/attach_profile; failure paths leave agent absent.",
+    "hubs.add correctly enforces current_authority before write when agent payload is present; same profile re-import is idempotent and different profile is blocked with 409.",
+    "agents.AgentView exposure remains configuration-only and excludes private instructions + updated_by from public output."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_agent_supplemental_regression_iteration6.py",
+    "/app/test_reports/iteration_6.json"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10 supplemental tests passed)",
+    "frontend": "100% (focused supplemental checks passed)"
+  },
+  "seed_data_creation": "None. No permanent accounts or mainnet transactions used.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Executed MOCKED/isolated backend coverage only for requested gaps. Frontend configured-profile rendering used TEST-ONLY interception of /api/tokens/{mint}/agent; real chart response remained untouched. Verified exact viewports 1920x800 and 390x844 with no overflow. Canonical mint route works; ticker alias route not supported by design.",
+  "rca of the issue": "Iteration_5 flagged '/token/FARTCOIN' as critical, but requirement clarification confirms this is not a product bug. Root cause: test-spec misread of shorthand constant vs routing requirement. Repro: '/token/FARTCOIN' returns 'Token Hub not found.' while '/token/9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump' resolves correctly. Mitigation: keep mint-only canonical route in tests/docs and do not introduce ticker alias lookup."
+}

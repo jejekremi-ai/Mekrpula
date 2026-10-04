@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "model_id": "gemini-3-flash-preview",
+      "run_id": "ec6639673922436129a980cd2de7f568",
+      "terminal": "completed",
+      "finish_reason": "stop",
+      "truncated": false,
+      "usage": {
+        "input_tokens": 532,
+        "output_tokens": 1735,
+        "total_tokens": 2267
+      },
+      "charged": 547100,
+      "reserved": 629200,
+      "tariff_version": "internal-test-v1",
+      "funded_balance_reserved_spent": {
+        "funded": 300000000,
+        "balance": 299452900,
+        "reserved": 0,
+        "spent": 547100
+      }
+    },
+    {
+      "model_id": "gemini-2.5-pro",
+      "run_id": "802351ccc03a8d3354113169a84bec7f",
+      "terminal": "completed",
+      "finish_reason": "length",
+      "truncated": true,
+      "usage": {
+        "input_tokens": 532,
+        "output_tokens": 1777,
+        "total_tokens": 2309
+      },
+      "charged": 1843500,
+      "reserved": 2023000,
+      "tariff_version": "internal-test-v1",
+      "funded_balance_reserved_spent": {
+        "funded": 300000000,
+        "balance": 298156500,
+        "reserved": 0,
+        "spent": 1843500
+      }
+    }
+  ]
+}

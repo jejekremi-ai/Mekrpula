@@ -1,0 +1,12 @@
+{
+  "status": "passed_with_documented_integration_limits",
+  "backend": {"live_api_regression": "20/20 passed", "isolated_payment_authority_tests": "15/15 passed", "invalid_transaction_metadata": "rejected"},
+  "frontend_verified": ["real nonce signature authentication with injected unfunded wallet", "listing image upload and publish", "busy double-submit guard", "listing removal", "community post, like and reply with rapid interaction", "reply state preserved during refresh", "all wallet dashboard tabs", "wallet disconnect", "unique modal and form test IDs"],
+  "viewports": [{"width": 1920, "height": 800}, {"width": 390, "height": 844}],
+  "final_horizontal_overflow": [],
+  "build": "passed; upstream missing-source-map warnings only",
+  "runtime_mocked_apis": [],
+  "test_only_substitutions": ["unfunded browser wallet injected for authentication only", "RPC/authority fixtures in isolated pytest"],
+  "not_executed": ["funded mainnet token launch", "funded mainnet payment", "real Phantom/Solflare extension transaction signing", "NFT mint and atomic exchange (not configured)"],
+  "test_data_cleanup": "UI test listings, posts and associated images removed; canonical hubs preserved"
+}

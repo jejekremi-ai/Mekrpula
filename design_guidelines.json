@@ -1,0 +1,142 @@
+{
+  "project_name": "MART Token Ecosystem - Agent Compute, Manual Execution & Budget Estimator",
+  "version": "3.0.0",
+  "summary_of_changes": {
+    "compute_credits": "Operational compute credit system per token with detailed usage breakdown, cost limits, auto-refill threshold, and internal test credits (no external monetary payment required).",
+    "manual_research_run": "Mandatory creator manual research execution run ('Jalankan Agent') using chosen model before automated/scheduled agent workflows can be activated.",
+    "budget_estimator": "Pre-top-up Budget & Cost Estimator calculating operational compute costs based on creator's chosen AI model (DeepSeek R1, Sonnet 3.5, GPT-4o, Llama 3.3) and job frequency (Hourly, Daily, Event-Triggered).",
+    "activity_log_events": "Live activity event log stream for every token in the Token Hub displaying agent step executions (Observe -> Research -> Strategy -> Action), model prompts, compute consumption, and timestamped logs.",
+    "treasury_removal": "Completely removed Treasury UI components, tabs, and breakdown panels from Token Hub and creator workflows. Historical treasury data remains archived on the backend without active UI exposure."
+  },
+  "theme_strategy": {
+    "theme_mode": "dark",
+    "canvas_bg": "#080b0d",
+    "surface_primary": "#101517",
+    "surface_secondary": "#141a1d",
+    "surface_elevated": "#17221d",
+    "accent_green": "#00efa0",
+    "accent_green_hover": "#36ffbc",
+    "accent_blue": "#38bdf8",
+    "accent_warning": "#f59e0b",
+    "forbidden_colors": [
+      "#7351B7",
+      "#1B93A4",
+      "generic bright purple gradients",
+      "teal blue gradients"
+    ],
+    "forbidden_words": [
+      "mind",
+      "mindscape",
+      "agentmind"
+    ],
+    "surface_treatment": "Tactical dark obsidian cards with 1px hairline borders (#232b2d or #294934) and subtle backdrop filters. Pure transparent headers/cards are forbidden."
+  },
+  "typography": {
+    "font_family_heading": "Outfit, sans-serif",
+    "font_family_body": "IBM Plex Sans, sans-serif",
+    "font_family_mono": "JetBrains Mono, monospace",
+    "scale": {
+      "hero_h1": "text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight",
+      "section_h2": "text-2xl sm:text-3xl lg:text-4xl font-extrabold",
+      "sub_h3": "text-xl sm:text-2xl font-bold",
+      "card_h4": "text-lg sm:text-xl font-semibold",
+      "mono_data": "font-mono text-xs sm:text-sm tracking-wider uppercase"
+    }
+  },
+  "colors": {
+    "canvas_bg": "#080b0d",
+    "surface_primary": "#101517",
+    "surface_secondary": "#141a1d",
+    "surface_elevated": "#17221d",
+    "border_subtle": "#232b2d",
+    "border_active": "#294934",
+    "accent_primary": "#00efa0",
+    "accent_hover": "#36ffbc",
+    "text_primary": "#f5f6f5",
+    "text_secondary": "#8b9699",
+    "text_muted": "#657175"
+  },
+  "layout_architecture": {
+    "token_hub_breakdown_layout": {
+      "structure": "Integrated Split View on Token Hub Overview",
+      "left_main_column": [
+        "DexScreener/Native Live Price Chart with timeframes (1H, 24H, 7D)",
+        "Token Stat Grid: Price, Market Cap, 24h Volume, Liquidity, Holder Count",
+        "Activity Log & Agent Execution Stream (Observe, Research, Strategy, Action events)"
+      ],
+      "right_agent_column": [
+        "Agent Core Identity & Status Badge (Active / Standby / Unconfigured)",
+        "Creator-Selected AI Model Badge (DeepSeek R1, Sonnet 3.5, GPT-4o, Llama 3.3)",
+        "Compute Credit Balance Card (Current Credits, Daily Burn Rate, Cost Limit)",
+        "Manual Execution Trigger ('Jalankan Agent' button for instant research run)",
+        "Scheduled Work Toggle (Unlocked ONLY after successful manual run)",
+        "Budget Estimator Card (Model, Frequency, Estimated Monthly Compute Cost)"
+      ],
+      "tabs_below_overview": [
+        "trade",
+        "market",
+        "events",
+        "community"
+      ]
+    },
+    "compute_credit_system": {
+      "balance_display": "Shows operational credits (e.g. 1,250.00 COMPUTECR)",
+      "usage_breakdown": [
+        "Model Inference Usage (Tokens In/Out)",
+        "Market Research & DexScreener Fetching",
+        "Sentiment & On-Chain Event Analysis",
+        "Execution & Output Dispatch"
+      ],
+      "cost_limit_controls": "Creator sets maximum daily cost ceiling (e.g. Max 50 COMPUTECR/day)",
+      "top_up": "Internal test credit claims (100 free test credits per request, no payment required)"
+    },
+    "budget_estimator_system": {
+      "parameters": [
+        "Selected AI Model (DeepSeek R1, Claude 3.5 Sonnet, GPT-4o, Llama 3.3 70B)",
+        "Run Frequency (Realtime/Event, Hourly, Every 6 Hours, Daily)"
+      ],
+      "output_calculation": "Displays projected daily, weekly, and monthly credit expenditure with cost breakdown before topping up."
+    },
+    "agent_manual_execution_and_scheduler_gate": {
+      "manual_button": "Action button 'Jalankan Agent' triggers immediate manual research run with live progress step feedback.",
+      "scheduled_toggle": "Schedule toggle is locked disabled with tooltip 'Jalankan 1x riset manual terlebih dahulu' until at least 1 manual run completes successfully."
+    },
+    "treasury_removal_policy": {
+      "hub_overview": "Removed all Treasury allocation charts, balance splits, and treasury metrics.",
+      "navigation": "Removed any references to Treasury across all pages.",
+      "backend": "Data structures preserved silently; UI elements completely replaced by Compute Credits and Activity Logs."
+    }
+  },
+  "component_instructions": {
+    "file_type": "JavaScript (.js and .jsx files)",
+    "data_test_ids": "Mandatory kebab-case data-testid attributes on all interactive elements, buttons, inputs, tabs, and status cards."
+  },
+  "testing_attributes": {
+    "key_test_ids": [
+      "hub-chart-container",
+      "hub-agent-breakdown-card",
+      "hub-compute-credit-card",
+      "hub-compute-balance",
+      "hub-top-up-credits-button",
+      "hub-manual-run-button",
+      "hub-scheduled-work-toggle",
+      "hub-budget-estimator-card",
+      "hub-activity-log-container",
+      "hub-activity-log-item",
+      "launch-agent-toggle",
+      "launch-model-select",
+      "budget-estimator-model-select",
+      "budget-estimator-frequency-select"
+    ]
+  },
+  "universal_guidelines_for_main_agent": [
+    "Preserve original MART visual identity (Deep Obsidian #080B0D, Emerald #00EFA0, JetBrains Mono, Outfit fonts).",
+    "Keep existing routes: /token/:address, /explore, /launch, /events, /wallet, /docs.",
+    "Ensure all components use JavaScript (.js / .jsx).",
+    "Enforce mandatory manual run ('Jalankan Agent') before enabling scheduled agent automation.",
+    "Provide clear compute credit balance, usage breakdown, cost limit, and budget estimator.",
+    "Provide real-time / interactive activity logs with events for all token hubs.",
+    "Completely remove Treasury panels/UI elements across the app.",
+    "Ensure all interactive elements have data-testid attributes."
+  ]
+}

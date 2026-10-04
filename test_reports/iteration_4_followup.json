@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-04",
+  "parent_report": "/app/test_reports/iteration_4.json",
+  "method": "Main-agent Playwright screenshot_tool self-test after testing-agent report",
+  "results": {
+    "connected_non_authority_publish_gate": "PASS: Ephemeral injected wallet signed real backend challenge; connected state blocked publication, no publish confirmation or connect CTA offered",
+    "original_connected_launch_form": "PASS: Original form rendered after real off-chain wallet authentication; no mainnet action submitted",
+    "explore_sort_testid": "PASS: Existing explore-sort test ID and explore-sort-market-cap option both present and functional; no code change needed",
+    "desktop_model_modal": "PASS: 1920x800; zero horizontal overflow after animation settled",
+    "mobile_model_modal": "PASS: 390x844; zero horizontal overflow",
+    "mobile_configuration": "PASS: 390x844; zero horizontal overflow",
+    "mobile_connected_launch": "PASS: 390x844; zero horizontal overflow"
+  },
+  "remaining_application_bugs": [],
+  "external_note": "Pre-existing third-party DexScreener iframe analytics can emit CORS noise; original integration preserved; core app and market data remain functional",
+  "boundaries": ["No mainnet transactions", "No real AI integration per user scope", "Authority-positive publish tested in isolated backend fixtures only", "Actual wallet extension not used; ephemeral injected signer exercised real server authentication"],
+  "credentials": "No persistent accounts or reusable credentials; ephemeral signing key exists only in browser test session"
+}

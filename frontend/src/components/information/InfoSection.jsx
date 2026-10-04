@@ -1,0 +1,3 @@
+export const InfoSection = ({ id, kicker, title, intro, children, className = '' }) => <section id={id} className={`mart-info-section ${className}`} data-testid={`info-section-${id}`} aria-labelledby={`${id}-heading`}>
+  <header className="mart-info-heading"><span className="eyebrow">{kicker}</span><h2 className="display-h2" id={`${id}-heading`} data-testid={`info-title-${id}`}>{title}</h2>{intro && <p data-testid={`info-intro-${id}`}>{intro}</p>}</header>{children}
+</section>;

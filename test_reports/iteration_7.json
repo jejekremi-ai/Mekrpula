@@ -1,0 +1,52 @@
+{
+  "summary": "Completed backend+frontend regression for compute credits, manual/scheduled research, cron webhook, and UI budget/limits/report flows on preview. Added a reusable pytest suite for scheduler and credit guardrails; backend passed with one auth-coverage skip due no creator-owned token in provided mint set.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/tokens/{mint}/compute/schedule",
+        "issue": "Creator-only 401/403 path could not be executed against provided mint list because none returned owner!=null in this environment (test skipped)."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Budget estimator selectors (mobile testability)",
+        "issue": "Frequency/model selector controls are not consistently addressable on mobile via stable testid selectors; id-based selector lookup was flaky in one mobile run.",
+        "selector": "#budget-estimator-frequency-select",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_compute_scheduler_regression_iteration7.py",
+    "/app/test_reports/pytest/pytest_results_iteration7_backend.xml"
+  ],
+  "action_items": [
+    "Provide one known creator-owned token fixture/mint in preview so automated 401/403 creator authorization checks can run deterministically.",
+    "Add explicit data-testid attributes for estimator model/frequency dropdown triggers/options to improve mobile automation reliability.",
+    "Security hardening: rotate and remove committed secrets from backend/.env in source control; load only via environment injection."
+  ],
+  "critical_code_review_comments": [
+    "compute_routes.view intentionally omits funded from public payload; ledger invariant validation required DB-backed verification in tests.",
+    "Cron endpoint contract is correct: auth required, malformed envelope returns 400, duplicate x-webhook-id accepted without duplicate dispatch.",
+    "Schedule authority mismatch correctly pauses schedule via dispatch path.",
+    "Critical security concern: backend/.env currently contains plaintext runtime secrets in repo (EMERGENT_LLM_KEY, WEBHOOK_CRON_SECRET)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_compute_scheduler_regression_iteration7.py",
+    "/app/test_reports/iteration_7.json"
+  ],
+  "success_rate": {
+    "backend": "92% (11 passed, 1 skipped, 0 failed)",
+    "frontend": "90% (critical compute flows passed; one mobile selector testability gap)"
+  },
+  "seed_data_creation": "No permanent auth accounts created. Test activity added internal test-credit topups and compute runs on FARTCOIN community-test account; schedules disabled at end.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Desktop and mobile screenshots captured at required sizes (1920x800 and 390x844) under /app/test_reports/iteration7-*. Backend suite validates: topup validation/idempotency/cap, concurrent run guard, low-balance/day-cap/per-run/pause blocks, manual-completion schedule gate, cron auth+malformed+duplicate handling, due scheduled run completion, authority-mismatch pause, FARTCOIN known run id privacy + ledger invariant. Creator authz path remains unverified due environment token ownership availability.",
+  "rca of the issue": "1) Skipped creator auth test RCA: provided canonical tokens currently resolve as community-test (owner null), so creator-only 401/403 path has no deterministic target. Mitigation: seed/declare one creator-owned mint for CI. 2) Mobile selector RCA: estimator controls rely on id/combobox structure without dedicated data-testid hooks; on narrow layout this produced intermittent non-location. Mitigation: add stable testids on trigger and option nodes."
+}

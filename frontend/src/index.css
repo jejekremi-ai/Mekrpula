@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=IBM+Plex+Sans:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+ :root { --background: 220 21% 4%; --foreground: 150 8% 96%; --card: 220 16% 7%; --card-foreground: 150 8% 96%; --popover: 220 16% 9%; --popover-foreground: 150 8% 96%; --primary: 158 100% 48%; --primary-foreground: 160 50% 5%; --secondary: 220 14% 12%; --secondary-foreground: 150 8% 96%; --muted: 220 14% 12%; --muted-foreground: 210 9% 58%; --accent: 220 14% 17%; --accent-foreground: 150 8% 96%; --destructive: 0 75% 55%; --destructive-foreground: 0 0% 98%; --border: 220 12% 15%; --input: 220 12% 18%; --ring: 158 100% 48%; --radius: 0.6rem; }
+ * { @apply border-border; box-sizing: border-box; }
+ body { @apply bg-background text-foreground; margin: 0; font-family: 'IBM Plex Sans', sans-serif; -webkit-font-smoothing: antialiased; }
+ button, input, textarea { font: inherit; }
+ button, a, input, textarea { -webkit-tap-highlight-color: transparent; }
+ button, a { touch-action: manipulation; }
+ a { text-decoration: none; color: inherit; }
+ button { cursor: pointer; }
+ ::selection { background: #00f5a0; color: #07110d; }
+ :focus-visible { outline: 2px solid #00f5a0; outline-offset: 4px; }
+ [data-debug-wrapper='true'] { display: contents !important; }
+}

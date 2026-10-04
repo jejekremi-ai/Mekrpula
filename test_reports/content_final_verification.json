@@ -1,0 +1,25 @@
+{
+  "task": "MART additive content expansion, not redesign",
+  "status": "passed",
+  "agent_report": "/app/test_reports/iteration_3.json",
+  "resolved_issue": "Repeated same-hash links now re-scroll on fresh router history entries; normal query-only navigation retains previous scrolling behavior.",
+  "self_checks": {
+    "repeat_home_anchor_visits": 16,
+    "anchors": ["about", "markets", "community", "faq"],
+    "repeat_docs_section_visits": 2,
+    "cross_route_docs_to_faq": "passed",
+    "original_add_token_dialog_reuse": "passed",
+    "faq_expand_and_keyboard": "passed",
+    "docs_topics": 12,
+    "home_information_sections": 14,
+    "home_pump_fun_mentions": 0,
+    "social_names_have_no_links": true
+  },
+  "viewports": [{"width": 1920, "height": 800}, {"width": 390, "height": 844}],
+  "horizontal_overflow": [],
+  "preserved": ["original App.css", "original index.css", "backend", "wallet/blockchain functionality", "hero headline/layout/CTAs", "original featured tokens/category images/ecosystem flow/final CTA", "header navigation"],
+  "build": "passed; pre-existing upstream dependency source-map warnings only",
+  "mocked_runtime_apis": [],
+  "test_database_writes": "none; existing canonical token duplicate-open check only",
+  "existing_limitations_documented": ["NFT minting/indexing/atomic exchange not enabled", "Events are not execution guarantees", "Direct non-custodial payments are not escrow"]
+}

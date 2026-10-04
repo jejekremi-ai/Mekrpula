@@ -1,0 +1,8 @@
+This product uses TradingView Lightweight Charts™.
+Copyright (c) TradingView, Inc. https://www.tradingview.com/
+Licensed under the Apache License, Version 2.0.
+https://www.apache.org/licenses/LICENSE-2.0
+
+On-chain OHLCV price history is provided by GeckoTerminal.
+https://www.geckoterminal.com/
+Market snapshots and external chart links use DexScreener.

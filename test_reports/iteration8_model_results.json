@@ -1,0 +1,88 @@
+{
+  "results": [
+    {
+      "model_id": "claude-sonnet-4-5",
+      "status": "PASS",
+      "run_id": "c374405ca3cf779fb7137fbea86eb9df",
+      "terminal_status": "completed",
+      "usage": {
+        "input_tokens": 613,
+        "output_tokens": 1470,
+        "total_tokens": 2083
+      },
+      "error": ""
+    },
+    {
+      "model_id": "claude-opus-4-5",
+      "status": "PASS",
+      "run_id": "a6c2eaf28374435af64af0f5cd6acb8b",
+      "terminal_status": "completed",
+      "usage": {
+        "input_tokens": 613,
+        "output_tokens": 29,
+        "total_tokens": 642
+      },
+      "error": ""
+    },
+    {
+      "model_id": "claude-haiku-4-5",
+      "status": "PASS",
+      "run_id": "6a7604a64831bcf1788ffd71e5664016",
+      "terminal_status": "completed",
+      "usage": {
+        "input_tokens": 613,
+        "output_tokens": 1155,
+        "total_tokens": 1768
+      },
+      "error": ""
+    },
+    {
+      "model_id": "gpt-5.2",
+      "status": "PASS",
+      "run_id": "13ba1b51c3735845e8b8172ce61e9fb9",
+      "terminal_status": "completed",
+      "usage": {
+        "input_tokens": 498,
+        "output_tokens": 850,
+        "total_tokens": 1348
+      },
+      "error": ""
+    },
+    {
+      "model_id": "gpt-5-mini",
+      "status": "PASS",
+      "run_id": "b8e2307ff5a93810160f948376ba6c3e",
+      "terminal_status": "completed",
+      "usage": {
+        "input_tokens": 498,
+        "output_tokens": 1340,
+        "total_tokens": 1838
+      },
+      "error": ""
+    },
+    {
+      "model_id": "gemini-3-flash-preview",
+      "status": "FAIL",
+      "run_id": "a74b127ccbe81581501303bd662e5c4a",
+      "terminal_status": "failed",
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "error": "Riset tidak selesai. Reservasi kredit uji dikembalikan; jadwal dijeda. Silakan coba lagi."
+    },
+    {
+      "model_id": "gemini-2.5-pro",
+      "status": "FAIL",
+      "run_id": "5a227e799d14d76eb262b39330193a1d",
+      "terminal_status": "failed",
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0
+      },
+      "error": "Riset tidak selesai. Reservasi kredit uji dikembalikan; jadwal dijeda. Silakan coba lagi."
+    }
+  ]
+}

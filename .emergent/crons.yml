@@ -1,0 +1,8 @@
+crons:
+  - name: token-research
+    description: "Menjalankan riset token sesuai jadwal dan batas kredit yang telah disetujui"
+    cron: "*/15 * * * *"
+    endpoint: "{{BASE_URL}}/api/cron/research"
+    method: POST
+    # Cron endpoints must ack 2xx immediately; enqueue/background the actual work.
+    enabled: true

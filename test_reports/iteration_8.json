@@ -1,0 +1,47 @@
+{
+  "summary": "Supplemental iteration8 integration testing completed for newly requested compute scope: real 7-model invocation coverage, isolated creator-auth fixture in shared Mongo, stale recovery/refund idempotency, scheduler owner-change refusal, exact concurrency gate, FARTCOIN scheduled completion check, and focused mobile dropdown verification.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "/api/tokens/{mint}/compute/runs",
+        "issue": "Real Gemini mappings fail at runtime via emergentintegrations stream (both gemini-3-flash-preview and gemini-2.5-pro terminate as failed with refunded reservation; backend logs show ChatError).",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_compute_supplemental_iteration8.py",
+    "/app/test_reports/pytest/pytest_results_iteration8_backend.xml",
+    "/app/test_reports/iteration8_model_results.json"
+  ],
+  "action_items": [
+    "Investigate Gemini provider ChatError path in emergentintegrations/LiteLLM bridge for model strings gemini-3-flash-preview and gemini-2.5-pro, since retries still failed with zero token usage.",
+    "Re-run only per-model real streaming verification after Gemini fix; keep current isolated creator fixture approach for deterministic owner authz coverage.",
+    "No secret leak claim: git ls-files backend/.env frontend/.env returned empty; keep existing key material unchanged per request."
+  ],
+  "critical_code_review_comments": [
+    "compute_runner sets required provider-specific params in code: OpenAI uses max_completion_tokens + reasoning_effort=low; Gemini uses thinking={type:disabled,budget_tokens:0}.",
+    "Scheduler ownership drift handling works: cron dispatch disables schedule when authorized owner no longer matches current creator.",
+    "Stale queued/running recovery is idempotent in tested path: single refund ledger entry only, schedule disabled, active_run cleared.",
+    "Public response hygiene passed in isolated fixture: run payload omits prompt/system, agent public profile omits private instructions, schedule view omits authorized_by."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_compute_supplemental_iteration8.py",
+    "/app/test_reports/iteration_8.json"
+  ],
+  "success_rate": {
+    "backend": "93% overall suite pass (7/7 tests passed); model execution sub-scope: 5/7 PASS, 2/7 FAIL (Gemini)",
+    "frontend": "100% for requested mobile estimator dropdown checks"
+  },
+  "seed_data_creation": "Created isolated disposable fixture only: random valid mint + TEST_ONLY hub/agent (source=mart-launch) with ephemeral signing-key wallet auth; cleaned hubs/agents/compute_accounts/compute_runs/sessions/nonces and disabled schedule at teardown. No canonical token ownership mutated.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Per-model real invocation evidence and run IDs are in /app/test_reports/iteration8_model_results.json. Anthropic/OpenAI models completed with positive input/output usage; both Gemini models failed twice with ChatError and zero usage. Backend log timestamps around 16:10 show repeated Gemini failures. Mobile dropdown test used required data-testid selectors at 390x844 and confirmed estimate changes while actual configured model badge remains unchanged.",
+  "rca of the issue": "Gemini integration failure RCA: Reproduced against real streaming calls through /api/tokens/{mint}/compute/runs on isolated creator fixture. Both gemini mappings accepted request and queued run but ended failed with standard refund message and zero token usage, while all Anthropic/OpenAI mappings succeeded with non-empty output and metered usage. Supervisor backend logs show provider-side ChatError specifically on Gemini calls, indicating runtime integration/provider incompatibility rather than schedule/credit/auth gate logic. Concurrency gate, auth matrix (401/403/owner success), stale recovery single-refund invariant, and scheduler owner-change refusal all reproduced as expected."
+}

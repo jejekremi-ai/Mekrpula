@@ -1,0 +1,45 @@
+{
+  "summary": "Executed correction-focused backend and frontend regression on preview. Backend chart/add-token/agent gate tests passed, and UI regression passed desktop+mobile including mandatory native mobile chart capture. One critical routing mismatch found: /token/FARTCOIN does not resolve to canonical hub.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Hub routing",
+        "issue": "Canonical path requirement mismatch: /token/FARTCOIN shows 'Token Hub not found' instead of resolving canonical hub overview.",
+        "selector": "[data-testid='error-message']",
+        "priority": "CRITICAL"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_agent_correction_regression.py",
+    "/app/test_reports/pytest/pytest_results_iteration5_backend.xml"
+  ],
+  "action_items": [
+    "Fix canonical token route behavior so /token/FARTCOIN resolves expected integrated hub (or align requirement/docs consistently to mint-only canonical URL).",
+    "After route fix, rerun full UI pass for /token/FARTCOIN plus legacy /token/{mint}/agent redirect and mobile chart regression."
+  ],
+  "critical_code_review_comments": [
+    "Frontend/API integrations are environment-driven correctly (process.env.REACT_APP_BACKEND_URL for API).",
+    "Native chart API contract is solid in tested scenarios: 160 sorted valid candles, invalid interval 422, unknown token 404, and isolated rejection of malformed/timeout/429/wrong-token payloads.",
+    "Old regression file /app/backend/tests/test_agent_storage_regression.py still contains obsolete expectations from deprecated Agent Studio behavior; avoid using it as current correction truth source."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_agent_correction_regression.py",
+    "/app/test_reports/iteration_5.json"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 in new correction suite)",
+    "frontend": "95% (critical flows passed except /token/FARTCOIN canonical route mismatch)"
+  },
+  "seed_data_creation": "No persistent seed data created. Auth used ephemeral Ed25519 signers only. No mainnet transactions submitted.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Validated on preview using REACT_APP_BACKEND_URL. Desktop/mobile (1920x800, 390x844) overflow checks passed on Hub/Launch/Add Token. Verified no whole-word 'mind' on edited pages tested. Confirmed landing/docs/header/footer/mobile triggers to /add-token. Mandatory mobile native chart screenshot captured at /app/test_reports/iteration5-native-chart-mobile-390x844.jpeg. Runtime API is real (NO MOCKED runtime APIs). Isolated backend mock tests were used only for provider-failure unit coverage.",
+  "rca of the issue": "Repro for routing bug: open https://pulse-ai-hub.preview.emergentagent.com/token/FARTCOIN -> page renders error 'Token Hub not found.' because route currently expects mint address values and directly calls /api/tokens/{address}. No symbol->mint canonical mapping exists in the current route/data fetch path. Mitigation: add explicit symbol alias resolution for canonical token (or update requirement/docs and links to mint-only canonical route consistently)."
+}

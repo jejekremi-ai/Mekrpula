@@ -1,0 +1,61 @@
+{
+  "summary": "Completed backend+frontend regression for Agent Studio, auth replay, authority-gated publish paths, and object-storage upload/image retrieval. Added new automated backend suite and executed desktop/mobile UI validation at exact required viewports.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Agent publish modal (connected non-authority wallet state)",
+        "issue": "Anonymous authority gate and connect-wallet CTA were validated, but connected non-authority blocked-state was not fully executed in browser automation because no active extension wallet session was available in this run.",
+        "affected_selectors": [
+          "[data-testid=agent-publish-profile]",
+          "[data-testid=agent-publish-gate]",
+          "[data-testid=agent-publish-connect]"
+        ]
+      },
+      {
+        "flow": "Hub page console integration",
+        "issue": "Observed browser console CORS failure against DexScreener event endpoint (third-party request). Core hub rendering and tab flows still worked.",
+        "affected_selectors": [
+          "[data-testid=hub-token-name]",
+          "[data-testid=hub-tab-market]"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_agent_storage_regression.py",
+    "/app/test_reports/pytest/pytest_results_iteration4_backend.xml",
+    "/root/.emergent/automation_output/20261004_141657/console_20261004_141657.log",
+    "/root/.emergent/automation_output/20261004_141730/console_20261004_141730.log"
+  ],
+  "action_items": [
+    "Run one manual/injected-wallet UI pass to verify connected non-authority publish remains blocked after wallet connection.",
+    "Optionally suppress or isolate third-party DexScreener console CORS noise if cleaner monitoring is required.",
+    "Add explicit data-testid to Explore sort control trigger for stronger E2E selector stability (testability improvement)."
+  ],
+  "critical_code_review_comments": [
+    "Launch source regression check passed: /app/frontend/src/pages/Launch.jsx is identical to /tmp/mart-source/frontend/src/pages/Launch.jsx (diff exit 0).",
+    "Agent backend schema validation is strict and fail-closed as expected (invalid model/capabilities/allocation/risk/creativity/extra fields rejected).",
+    "Isolated publish test confirms activity history cap at 30 and authority failure path performs no DB update.",
+    "Object storage migration behavior validated: /api/uploads creates Mongo metadata with storage_path and no binary image data field required for retrieval path.",
+    "Project testability gap: not every interactive control has a stable data-testid (e.g., Explore sort trigger), which weakens deterministic UI automation."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_agent_storage_regression.py",
+    "/app/test_reports/iteration_4.json"
+  ],
+  "success_rate": {
+    "backend": "100% (22/22 new targeted tests passed)",
+    "frontend": "92% (all planned anonymous/core flows passed; connected non-authority wallet-state pending)"
+  },
+  "seed_data_creation": "No persistent seeded data created. Used ephemeral Ed25519 signing wallets for real off-chain auth tests and cleaned uploaded image metadata test record.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Desktop and mobile screenshots were captured at exact 1920x800 and 390x844 for agent overview/config/model modal/long text plus home/launch/hub; no horizontal overflow detected in tested pages. Agent local draft save->reload persistence, per-token isolation, reset cancel/confirm, model picker provider filters (all 6), no-results search, and publish anonymous gate were verified. Backend coverage added for /api/agent/models, /api/agent/validate, /api/tokens/{mint}/agent, authority-gated publish (runtime + isolated), auth replay, and /api/uploads->/api/images object storage metadata flow.",
+  "rca of the issue": "Primary remaining gap is environment-driven: wallet-extension-dependent connected non-authority state could not be fully asserted in this run without an active browser wallet session. All backend authority gates were validated via API and isolated publish function tests; therefore risk is limited to final UI state confirmation rather than backend enforcement."
+}

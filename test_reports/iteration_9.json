@@ -1,0 +1,46 @@
+{
+  "summary": "Verified critical Gemini fix on backend-only scope using isolated creator fixture and real /api/tokens/{mint}/compute/runs flow for exactly two mappings: gemini-3-flash-preview and gemini-2.5-pro.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "/api/tokens/{mint}/compute/runs/{run_id}",
+        "issue": "gemini-2.5-pro completed with finish_reason=length (truncated=true) while still within output token cap <=1800."
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_compute_gemini_regression_iteration9.py",
+    "/app/test_reports/pytest/pytest_results_iteration9_backend.xml",
+    "/app/test_reports/iteration9_gemini_results.json"
+  ],
+  "action_items": [
+    "Optional: review prompt/output strategy for gemini-2.5-pro to reduce finish_reason=length truncation frequency.",
+    "No further Gemini proxy-compatibility fix required based on this run; regression is green for both requested mappings."
+  ],
+  "critical_code_review_comments": [
+    "compute_runner no longer sends unsupported Gemini thinking payload; provider-agnostic params now rely on max_tokens for Gemini and max_completion_tokens/reasoning_effort for OpenAI.",
+    "Funding invariant validated from DB after each Gemini run: funded == balance + reserved + spent.",
+    "Prior secret leak concern is disproved: env files remain ignored/untracked as previously reported."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_compute_gemini_regression_iteration9.py",
+    "/app/test_reports/iteration9_gemini_results.json",
+    "/app/test_reports/iteration_9.json",
+    "/app/test_reports/pytest/pytest_results_iteration9_backend.xml"
+  ],
+  "success_rate": {
+    "backend": "100% (1/1 pytest test passed; 2/2 Gemini mappings completed)",
+    "frontend": "N/A (not requested)"
+  },
+  "seed_data_creation": "No permanent auth or canonical owner changes. Reused isolated ephemeral creator fixture from iteration8; teardown cleans hubs/agents/compute_accounts/compute_runs/sessions/nonces.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Gemini regression evidence is in iteration9_gemini_results.json with run_ids ec6639673922436129a980cd2de7f568 and 802351ccc03a8d3354113169a84bec7f. Both terminal=completed, positive usage and non-empty output; gemini-2.5-pro finish_reason=length.",
+  "rca of the issue": "Iteration8 failures were consistent with unsupported Gemini param forwarding through OpenAI-compatible proxy. After removing thinking payload, both targeted Gemini mappings complete successfully through full app compute run path with correct metering and charge settlement."
+}

@@ -1,0 +1,1 @@
+export const openAddToken = () => window.dispatchEvent(new Event('mart:open-add-token'));

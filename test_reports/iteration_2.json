@@ -1,0 +1,58 @@
+{
+  "summary": "Completed focused backend fixture-controlled follow-up for payment/launch/authority logic (15 isolated tests passed). Frontend signed-auth + listing double-submit guard partially validated with injected Phantom; community/wallet/mobile-overflow coverage was blocked by external preview sleep page.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Listing modal",
+        "issue": "Duplicate data-testid collision: modal description uses data-testid=listing-description and listing textarea also uses id/data-testid listing-description, causing ambiguous selectors and brittle automation.",
+        "selector": "[data-testid=listing-description]",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Hub market -> community and downstream wallet/mobile checks",
+        "issue": "Preview intermittently switches to 'Preview Unavailable!!!' sleep page mid-run, preventing community post/reply/like and later mobile overflow verification.",
+        "affected_selectors": [
+          "[data-testid=community-post-input]",
+          "[data-testid^=reply-post-]",
+          "[data-testid^=wallet-tab-]",
+          "[data-testid=listing-modal]"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_payment_integrity_followup.py",
+    "/app/test_reports/pytest/pytest_results_iteration2.xml",
+    "/app/backend/tests/test_mart_api_regression.py"
+  ],
+  "action_items": [
+    "Fix duplicate data-testid naming in listing modal (e.g., keep modal description as listing-modal-description; keep textarea as listing-description).",
+    "Stabilize preview availability/session during longer browser flows, then rerun remaining community/wallet/mobile-overflow checks.",
+    "After preview stability, rerun signed-browser test to fully confirm listing create->remove, community post/reply/like, wallet tabs, disconnect, and 390x844 listing dialog bounds in one pass."
+  ],
+  "critical_code_review_comments": [
+    "Backend follow-up logic is solid in isolated tests: exact_payment hash checks, expired reservation reconciliation, verify idempotence, finalized mismatch rejection, and launch confirm guard paths all passed.",
+    "Btn busy guard behavior validated from browser request capture: double-click on listing submit issued only one POST request.",
+    "UI testability issue: reused test id (listing-description) across two different elements violates unique-selector expectation for robust e2e automation."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_payment_integrity_followup.py",
+    "/app/test_reports/iteration_2.json"
+  ],
+  "success_rate": {
+    "backend": "100% (15/15 focused fixture tests passed)",
+    "frontend": "55% (signed auth + listing publish path validated; remaining requested flows blocked by preview unavailability)"
+  },
+  "seed_data_creation": "Generated ephemeral unfunded Ed25519 key in-browser for signature auth injection only; no key persisted. Cleaned TEST_UI_LISTING_ITER2* listings from DB after run.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Use injected Phantom approach (window.phantom.solana + Python-exposed signer) to run real /auth/challenge and /auth/verify noncustodial login. Listing double-submit guard already observed as single POST. Community/wallet/mobile steps were blocked by preview sleep page, not selector-only failures. Continue from hub URL once preview stays awake.",
+  "rca of the issue": "RCA-1: Browser run interruptions came from external preview lifecycle ('Preview Unavailable!!! Our Agent is resting after inactivity'), causing abrupt context loss when navigating to /community. This is environment/runtime availability, not app business logic. Mitigation: keep preview warm or run in non-sleeping environment for full UI regression. RCA-2: Duplicate listing-description test id comes from Modal using id-derived description testid plus form field using same id; mitigation is unique data-testid names for modal metadata vs form controls."
+}

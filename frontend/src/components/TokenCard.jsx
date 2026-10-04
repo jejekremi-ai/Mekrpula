@@ -1,0 +1,9 @@
+import { Link } from 'react-router-dom';
+import { ArrowUpRight, Store, CalendarDays, BadgeCheck, ArrowUp, ArrowDown } from 'lucide-react';
+import { money, count } from '../lib/api';
+import { TokenAvatar } from './Kit';
+
+export const TokenCard = ({ token, index = 0 }) => <Link to={`/token/${token.address}/market`} data-testid={`token-card-${token.address}`} className={`token-card token-color-${index % 4}`}>
+  <div className="token-cover">{token.banner ? <img src={token.banner} alt={`${token.name} community banner`} loading="lazy" /> : <span className="cover-symbol">${token.symbol}</span>}<span className="chain-badge"><i />SOLANA</span><span className="card-open"><ArrowUpRight size={17} /></span></div>
+  <div className="token-card-body"><div className="token-card-identity"><TokenAvatar token={token} /><div><h3 data-testid={`token-name-${token.address}`}>{token.name}{token.claimed_by && <BadgeCheck size={16} className="green" />}</h3><span className="mono">${token.symbol}</span></div><span className={`token-change ${(token.change || 0) >= 0 ? 'positive' : 'negative'}`} data-testid={`token-change-${token.address}`}>{token.change != null && ((token.change || 0) >= 0 ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}{token.change != null ? `${Math.abs(token.change).toFixed(2)}%` : '—'}</span></div><div className="token-card-metrics"><div><span>Market cap</span><strong data-testid={`token-mcap-${token.address}`}>{money(token.market_cap)}</strong></div><div><span>24h volume</span><strong data-testid={`token-volume-${token.address}`}>{money(token.volume)}</strong></div></div><div className="token-card-bottom"><span><Store size={13} />{count(token.listing_count)} listings</span><span><CalendarDays size={13} />{count(token.event_count)} events</span><span className="green">Open Hub<ArrowUpRight size={13} /></span></div></div>
+</Link>;

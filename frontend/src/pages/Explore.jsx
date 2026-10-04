@@ -1,0 +1,13 @@
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, Grid2X2, List, ArrowUpRight } from 'lucide-react';
+import { useData } from '../lib/api';
+import { TokenCard } from '../components/TokenCard';
+import { Loading, ErrorBox, Empty, Choice } from '../components/Kit';
+
+export default function Explore() {
+  const [params, setParams] = useSearchParams(); const q = params.get('q') || '';
+  const [sort, setSort] = useState('trending'), [verified, setVerified] = useState(false), [view, setView] = useState('grid');
+  const { data, loading, error } = useData(`/tokens?q=${encodeURIComponent(q)}&sort=${sort}&verified=${verified}`);
+  return <main className="container page"><div className="page-heading"><span className="eyebrow">EVERY TOKEN. ITS OWN WORLD.</span><h1 data-testid="explore-title">Find your next community<span className="green">.</span></h1><p>Discover tokens. Explore their markets. Be part of what comes next.</p></div><div className="explore-toolbar"><div className="search-input"><Search size={18} /><input data-testid="explore-search" aria-label="Search token name, symbol or address" value={q} onChange={e => setParams(e.target.value ? { q: e.target.value } : {})} placeholder="Search by name, symbol, or token address" /></div><Choice id="explore-sort" label="Sort by" value={sort} onChange={setSort} options={[{ value: 'trending', label: 'Trending' }, { value: 'market-cap', label: 'Market cap' }, { value: 'newest', label: 'Recently added' }]} /></div><div className="filter-bar"><div className="pills"><button data-testid="filter-all-tokens" className={!verified ? 'active' : ''} onClick={() => setVerified(false)}>All tokens</button><button data-testid="filter-verified-tokens" className={verified ? 'active' : ''} onClick={() => setVerified(true)}>Verified hubs</button></div><div className="view-controls"><span data-testid="token-result-count">{data?.length || 0} tokens</span><button data-testid="grid-view" aria-label="Grid view" className={view === 'grid' ? 'active' : ''} onClick={() => setView('grid')}><Grid2X2 size={17} /></button><button data-testid="list-view" aria-label="List view" className={view === 'list' ? 'active' : ''} onClick={() => setView('list')}><List size={19} /></button></div></div>{loading ? <Loading /> : error ? <ErrorBox error={error} /> : data?.length ? <div className={`token-grid ${view === 'list' ? 'list-view' : ''}`}>{data.map((t, i) => <TokenCard token={t} index={i} key={t.address} />)}</div> : <Empty title="No tokens found" text="Try another name or address. Use + Add Token to bring an existing Solana token to MART." icon={Search} />}</main>;
+}
