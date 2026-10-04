@@ -10,14 +10,14 @@ from chain import current_authority
 from compute_catalog import UNIT, catalog
 
 def event(kind, title, run_id=None):
-    return {'id': uid(), 'kind': kind, 'title': title, 'at': now().isoformat(), 'run_id': run_id}
+    return {'id': uid(), 'kind': kind, 'title': title, 'at': now().isoformat(), 'run_id': run_id, 'language': 'en'}
 
 async def context(mint):
     hub = await get_hub(mint)
     agent = await db.agents.find_one({'token': mint}, {'_id': 0})
     profile = agent['profile'] if agent else {
         'name': f'{hub["symbol"]} Research', 'role': 'Market analyst',
-        'mission': f'Riset kondisi pasar {hub["name"]}, aktivitas komunitas, risiko, dan ide event berdasarkan sumber yang tersedia.',
+        'mission': f'Study {hub["name"]} market conditions, follow its community, and develop evidence-based event ideas. Flag risks and gaps in the available data.',
         'model_id': 'claude-sonnet-4-5', 'risk': 'Conservative', 'creativity': 0.3,
         'instructions': '', 'capabilities': ['observe', 'research', 'think', 'strategy', 'monitor']}
     return hub, agent, profile
@@ -70,13 +70,13 @@ async def settle(run, cost=0, usage=None, success=False, reason=None):
     result = await db.compute_accounts.find_one_and_update({'token': run['token'], 'active_run': run['id']},
         {'$set': updates, '$inc': inc, '$push': {'ledger': {'$each': [entry], '$slice': -500},
         'activity': {'$each': [event('completed' if success else 'failed',
-        f'Riset selesai · {cost / UNIT:.4f} CR' if success else (reason or 'Riset gagal; reservasi dikembalikan.'), run['id'])], '$slice': -150}}},
+        'Research completed' if success else (reason or 'Research failed; the reservation was released.'), run['id'])], '$slice': -150}}},
         projection={'_id': 0}, return_document=ReturnDocument.AFTER)
     return result is not None
 
 async def recover_stale():
     cutoff = (now() - timedelta(minutes=8)).isoformat()
     async for run in db.compute_runs.find({'status': {'$in': ['queued', 'running']}, 'created_at': {'$lt': cutoff}}, {'_id': 0}):
-        await settle(run, reason='Pekerjaan terputus; kredit uji dikembalikan. Jadwal dijeda.')
+        await settle(run, reason='Research was interrupted. The reservation was released and the schedule paused.')
         await db.compute_runs.update_one({'id': run['id'], 'status': {'$in': ['queued', 'running']}},
-            {'$set': {'status': 'failed', 'error': 'Eksekusi terputus. Silakan jalankan kembali.', 'finished_at': now().isoformat(), 'charged': 0}})
+            {'$set': {'status': 'failed', 'error': 'Execution was interrupted. Please run research again.', 'finished_at': now().isoformat(), 'charged': 0}})

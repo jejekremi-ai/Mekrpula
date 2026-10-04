@@ -1,42 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Coins, Plus, Play, Settings2, Pause, ShieldCheck } from 'lucide-react';
-import { Btn, Field, Modal } from '../Kit';
+import { Plus, Pause, Play } from 'lucide-react';
+import { Btn, Field } from '../Kit';
 import { Switch } from '../ui/switch';
 import { useWallet } from '../WalletContext';
 
 export const CreditPanel = ({ data, busy, action, onEstimate }) => {
-  const [limits, setLimits] = useState(false);
-  const [perRun, setPerRun] = useState(20), [perDay, setPerDay] = useState(50);
+  const [perRun, setPerRun] = useState(data.per_run_limit), [perDay, setPerDay] = useState(data.daily_limit);
   const { openWallet } = useWallet();
-  const savedRunLimit = data?.per_run_limit, savedDailyLimit = data?.daily_limit;
-  useEffect(() => { if (savedRunLimit != null) { setPerRun(savedRunLimit); setPerDay(savedDailyLimit); } }, [savedRunLimit, savedDailyLimit]);
-  if (!data) return <aside className="compute-credit-panel" data-testid="compute-credit-loading">Menyiapkan kredit…</aside>;
-  const running = !!data.active_run;
-  return <aside className="compute-credit-panel" data-testid="hub-compute-credit-card">
-    <div className="compute-panel-heading"><span><Coins size={15} />KREDIT COMPUTE</span><span className="compute-test-tag" data-testid="compute-test-mode">KREDIT UJI</span></div>
-    <div className="compute-balance"><span data-testid="compute-balance-label">Saldo tersedia</span><strong data-testid="hub-compute-balance">{data.balance.toFixed(2)}<small>CR</small></strong><span className="compute-reserved" data-testid="compute-reserved">{data.reserved.toFixed(4)} CR direservasi</span></div>
-    <div className="compute-mini-stats"><div><span>Terpakai</span><strong data-testid="compute-spent">{data.spent.toFixed(4)} CR</strong></div><div><span>Riset selesai</span><strong data-testid="compute-completed">{data.runs_completed.toString().padStart(2, '0')}</strong></div></div>
-    <div className="compute-daily"><div><span>Pemakaian hari ini</span><strong data-testid="compute-daily-spend">{data.day_spent.toFixed(2)} / {data.daily_limit} CR</strong></div><div className="compute-progress"><span style={{ width: `${Math.min(100, data.day_spent / data.daily_limit * 100)}%` }} /></div><span data-testid="compute-run-limit">Maks. {data.per_run_limit} CR / riset · {data.remaining_daily_runs} riset tersisa hari ini</span></div>
-    <button className="compute-estimate-link" data-testid="compute-before-topup-estimate" onClick={onEstimate}>Lihat estimasi sebelum isi kredit ↗</button>
-    <Btn secondary busy={busy === 'topup'} disabled={!data.can_manage || !!busy} data-testid="hub-top-up-credits-button" onClick={() => action('topup', { amount: 100, request_id: crypto.randomUUID() })}><Plus size={15} />Isi 100 kredit uji</Btn>
-    <Btn busy={running || busy === 'runs'} disabled={!data.can_manage || !data.runnable || data.paused || data.balance === 0 || !!busy || running || !data.remaining_daily_runs} data-testid="hub-manual-run-button" onClick={() => action('runs', { request_id: crypto.randomUUID() })}>{running ? <span>Riset sedang berjalan</span> : <><Play size={14} fill="currentColor" />Jalankan Agent</>}</Btn>
-    <div className="compute-controls"><button data-testid="compute-limits-open" disabled={!data.can_manage || running} onClick={() => setLimits(true)}><Settings2 size={13} />Batas biaya</button><button data-testid="compute-pause" disabled={!data.can_manage || running || !!busy} onClick={() => action('limits', { per_run_limit: data.per_run_limit, daily_limit: data.daily_limit, paused: !data.paused }, 'PATCH')}><Pause size={13} />{data.paused ? 'Lanjutkan' : 'Jeda'}</button></div>
-    {!data.can_manage && <button className="text-link" data-testid="compute-creator-connect" onClick={openWallet}>Hubungkan wallet kreator ↗</button>}
-    {!data.runnable && <p className="compute-warning" data-testid="compute-provider-unavailable">Model belum terhubung atau research tidak diaktifkan kreator.</p>}
-    <p className="compute-fineprint" data-testid="compute-credit-disclaimer"><ShieldCheck size={12} />Kredit internal, bukan uang atau aset. Riset memakai AI sungguhan. Tidak ada transaksi otomatis.</p>
-    <Modal open={limits} onClose={() => setLimits(false)} id="compute-limits" title="Batas biaya agent" description="Reservasi harus muat dalam batas per riset dan sisa batas harian. Hari dihitung dalam UTC.">
-      <form className="form-stack" data-testid="compute-limits-form" onSubmit={async e => { e.preventDefault(); if (await action('limits', { per_run_limit: Number(perRun), daily_limit: Number(perDay), paused: data.paused }, 'PATCH')) setLimits(false); }}>
-        <Field id="compute-limit-per-run" label="Batas per riset (CR)" type="number" min="0.01" max="50" step="0.01" required value={perRun} onChange={e => setPerRun(e.target.value)} />
-        <Field id="compute-limit-daily" label="Batas harian (CR)" type="number" min="0.01" max="200" step="0.01" required value={perDay} onChange={e => setPerDay(e.target.value)} />
-        <Btn type="submit" busy={busy === 'limits'} data-testid="compute-limits-save">Simpan batas</Btn>
-      </form>
-    </Modal>
-  </aside>;
+  const savedRun = data.per_run_limit, savedDay = data.daily_limit;
+  useEffect(() => { setPerRun(savedRun); setPerDay(savedDay); }, [savedRun, savedDay]);
+  return <section className="settings-operation" data-testid="hub-compute-credit-card">
+    <div className="settings-balance-line"><div><span>Available compute</span><strong data-testid="hub-compute-balance">{data.balance.toFixed(4)} <small>CR</small></strong></div><span className="settings-test-label" data-testid="compute-test-mode">INTERNAL TEST CREDITS</span></div>
+    <div className="settings-metrics"><span data-testid="compute-reserved">Reserved <b>{data.reserved.toFixed(4)} CR</b></span><span data-testid="compute-spent">Total used <b>{data.spent.toFixed(4)} CR</b></span><span data-testid="compute-daily-spend">Today <b>{data.day_spent.toFixed(4)} / {data.daily_limit} CR</b></span><span data-testid="compute-run-limit">Daily attempts left <b>{data.remaining_daily_runs} / 5</b></span></div>
+    <div className="settings-fund-actions"><button className="text-link" data-testid="compute-before-topup-estimate" onClick={onEstimate}>Review budget estimate ↗</button><Btn secondary busy={busy === 'topup'} disabled={!data.can_manage || !!busy} data-testid="hub-top-up-credits-button" onClick={() => action('topup', { amount: 100, request_id: crypto.randomUUID() })}><Plus size={13} />Add 100 test credits</Btn></div>
+    <form className="settings-limit-form" data-testid="compute-limits-form" onSubmit={e => { e.preventDefault(); action('limits', { per_run_limit: Number(perRun), daily_limit: Number(perDay), paused: data.paused }, 'PATCH'); }}><div className="form-row"><Field id="compute-limit-per-run" label="Per-run limit (CR)" type="number" min="0.01" max="50" step="0.01" required disabled={!data.can_manage || !!data.active_run} value={perRun} onChange={e => setPerRun(e.target.value)} /><Field id="compute-limit-daily" label="Daily limit (CR)" type="number" min="0.01" max="200" step="0.01" required disabled={!data.can_manage || !!data.active_run} value={perDay} onChange={e => setPerDay(e.target.value)} /></div><p className="settings-helper" data-testid="compute-limit-note">Reservations must fit both limits. Daily limits reset at 00:00 UTC.</p><div className="settings-form-actions"><Btn secondary type="button" disabled={!data.can_manage || !!data.active_run || !!busy} data-testid="compute-pause" onClick={() => action('limits', { per_run_limit: data.per_run_limit, daily_limit: data.daily_limit, paused: !data.paused }, 'PATCH')}>{data.paused ? <Play size={12} /> : <Pause size={12} />}{data.paused ? 'Resume agent' : 'Pause agent'}</Btn><Btn type="submit" busy={busy === 'limits'} disabled={!data.can_manage || !!data.active_run || !!busy} data-testid="compute-limits-save">Save limits</Btn></div></form>
+    {!data.can_manage && <button className="text-link" data-testid="compute-creator-connect" onClick={openWallet}>Connect the creator wallet ↗</button>}
+    {!data.runnable && <p className="terminal-notice" data-testid="compute-provider-unavailable">The selected model is not connected, or research is not enabled by the creator.</p>}
+    <p className="settings-helper" data-testid="compute-credit-disclaimer">Research uses real AI. Credits are internal testing units only; no money is collected and no transactions are executed.</p>
+  </section>;
 };
 
-export const SchedulePanel = ({ data, busy, action, frequency }) => <div className="compute-schedule" data-testid="compute-schedule-panel">
-  <div><strong data-testid="compute-schedule-title">Riset terjadwal</strong><p data-testid="compute-schedule-status">{!data?.manual_completed ? 'Terkunci · selesaikan satu riset manual' : data.schedule.enabled ? 'Aktif · ' + data.schedule.frequency : 'Siap diaktifkan'}</p></div>
-  <Switch aria-label="Aktifkan riset terjadwal" data-testid="hub-scheduled-work-toggle" checked={!!data?.schedule.enabled} disabled={!data?.manual_completed || !data?.can_manage || data?.paused || !!busy} onCheckedChange={enabled => action('schedule', { enabled, frequency }, 'PATCH')} />
-  {data?.schedule.enabled && <p className="compute-schedule-next" data-testid="compute-next-run">Berikutnya: {new Date(data.schedule.next_run_at).toLocaleString('id-ID')} · pemeriksaan setiap 15 menit<br />Masa uji 7 hari; berhenti saat kredit atau batas habis.</p>}
-  {data?.schedule.enabled && data.schedule.frequency !== frequency && data.can_manage && <button className="text-link" data-testid="compute-schedule-apply-frequency" disabled={!!busy} onClick={() => action('schedule', { enabled: true, frequency }, 'PATCH')}>Terapkan frekuensi baru ↗</button>}
-</div>;
+export const SchedulePanel = ({ data, busy, action, frequency }) => <div className="settings-schedule" data-testid="compute-schedule-panel"><div><strong data-testid="compute-schedule-title">Scheduled research</strong><p data-testid="compute-schedule-status">{!data.manual_completed ? 'Locked until a manual research run succeeds' : data.schedule.enabled ? `Active · ${data.schedule.frequency}` : 'Ready to enable'}</p></div><Switch aria-label="Enable scheduled research" data-testid="hub-scheduled-work-toggle" checked={!!data.schedule.enabled} disabled={!data.manual_completed || !data.can_manage || data.paused || !!busy} onCheckedChange={enabled => action('schedule', { enabled, frequency }, 'PATCH')} />{data.schedule.enabled && <p className="settings-schedule-next" data-testid="compute-next-run">Next: {new Date(data.schedule.next_run_at).toLocaleString('en-US')} · checked every 15 minutes<br />Trial schedules expire after 7 days and stop at operating limits.</p>}{data.schedule.enabled && data.schedule.frequency !== frequency && data.can_manage && <button className="text-link" data-testid="compute-schedule-apply-frequency" disabled={!!busy} onClick={() => action('schedule', { enabled: true, frequency }, 'PATCH')}>Apply new frequency ↗</button>}</div>;

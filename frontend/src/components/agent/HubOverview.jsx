@@ -1,37 +1,43 @@
 import { useEffect, useState } from 'react';
-import { BarChart3, ArrowUpRight, Radio, RefreshCw } from 'lucide-react';
+import { Play, Loader2, Settings2, RefreshCw, Radio } from 'lucide-react';
 import { toast } from 'sonner';
 import { api, useData } from '../../lib/api';
-import { External } from '../Kit';
 import { useWallet } from '../WalletContext';
 import { AgentProfileSummary } from './AgentProfileSummary';
-import { TokenPriceChart } from './TokenPriceChart';
-import { CreditPanel } from './ComputePanels';
-import { BudgetEstimator } from './BudgetEstimator';
-import { ResearchActivity } from './ResearchActivity';
+import { AgentActivityFeed, ResearchTerminal, ResearchArchive } from './ResearchActivity';
+import { AgentMarketTerminal, EventRadar, EventIdeas, CommunityTerminal } from './TokenTerminals';
+import { AgentSettings } from './AgentSettings';
 
 export const HubOverview = ({ token }) => {
-  const { data: agent, loading, error, reload } = useData(`/tokens/${token.address}/agent`);
+  const { data: agent, error, reload } = useData(`/tokens/${token.address}/agent`);
   const { data: compute, error: computeError, reload: reloadCompute } = useData(`/tokens/${token.address}/compute`);
-  const [busy, setBusy] = useState(''), [actionError, setActionError] = useState('');
+  const { data: events, error: eventError, reload: reloadEvents } = useData(`/events?token=${token.address}`);
+  const { data: posts, error: postError, reload: reloadPosts } = useData(`/tokens/${token.address}/posts`);
+  const [busy, setBusy] = useState(''), [actionError, setActionError] = useState(''), [settings, setSettings] = useState(false);
   const { wallet } = useWallet();
   useEffect(() => { reloadCompute(); }, [wallet, reloadCompute]);
   useEffect(() => { const timer = setInterval(() => { if (!document.hidden) reloadCompute(); }, compute?.active_run ? 1500 : 10000); return () => clearInterval(timer); }, [compute?.active_run, reloadCompute]);
+  useEffect(() => { const timer = setInterval(() => { if (!document.hidden) { reloadEvents(); reloadPosts(); } }, 30000); return () => clearInterval(timer); }, [reloadEvents, reloadPosts]);
   async function action(path, body, method = 'POST') {
     setBusy(path); setActionError('');
-    try { await api(`/tokens/${token.address}/compute/${path}`, { method, body }); reloadCompute(); reload(); toast.success(({ topup: '100 kredit uji ditambahkan', runs: 'Agent mulai mengumpulkan data token', limits: 'Batas operasional disimpan', schedule: 'Jadwal riset diperbarui' })[path]); return true; }
+    try { await api(`/tokens/${token.address}/compute/${path}`, { method, body }); reloadCompute(); reload(); toast.success(({ topup: 'Test credits added', runs: 'Research started', limits: 'Operating settings saved', schedule: 'Research schedule updated' })[path]); return true; }
     catch (e) { setActionError(e.message); toast.error(e.message); return false; }
     finally { setBusy(''); }
   }
-  const toBudget = () => document.getElementById('compute-budget')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  return <section className="token-overview" data-testid="hub-integrated-overview">
-    <div className="compute-overview-heading"><span><Radio size={14} />AGENT WORKSPACE</span><span data-testid="hub-compute-mode">{compute?.mode === 'creator' ? 'KONFIGURASI KREATOR' : 'RISET KOMUNITAS · MODE UJI'}<i />{compute?.active_run ? 'RISET BERJALAN' : compute?.paused ? 'DIJEDA' : 'SIAP'}</span></div>
-    {(actionError || computeError) && <div className="compute-inline-error" role="alert" data-testid="compute-action-error"><p>{actionError || computeError}</p><button data-testid="compute-error-retry" onClick={() => { setActionError(''); reloadCompute(); }}><RefreshCw size={14} />Coba lagi</button></div>}
-    <div className="token-overview-grid">
-      {loading ? <div className="token-agent-summary token-panel-loading" data-testid="hub-agent-loading">Loading agent profile…</div> : error ? <div className="token-agent-summary token-panel-loading" role="alert" data-testid="hub-agent-error"><p>{error}</p><button className="text-link" data-testid="hub-agent-retry" onClick={reload}>Retry agent profile</button></div> : <AgentProfileSummary agent={agent} compute={compute} />}
-      <div className="token-chart-section" data-testid="hub-chart-container"><div className="token-panel-title"><span><BarChart3 size={15} /> PRICE CHART</span><External id="hub-overview-chart-link" href={token.dex_url}>Open chart</External></div><TokenPriceChart token={token} /><div className="token-chart-summary"><span data-testid="hub-chart-source">24H change · DexScreener snapshot</span><span data-testid="hub-chart-change" className={token.change >= 0 ? 'positive' : 'negative'}>{token.change == null ? '—' : `${token.change >= 0 ? '+' : ''}${token.change.toFixed(2)}%`} <small>24H</small></span></div><div className="token-trade-actions"><External href={token.pump_url} className="btn btn-primary" id="hub-overview-buy">Buy ${token.symbol}<ArrowUpRight size={13} /></External><External href={token.pump_url} className="btn btn-secondary" id="hub-overview-sell">Sell ${token.symbol}</External><span data-testid="hub-chart-disclaimer">Public price history, not a streaming execution price.</span></div></div>
-      <CreditPanel data={compute} busy={busy} action={action} onEstimate={toBudget} />
+  const running = !!compute?.active_run;
+  const run = () => {
+    if (!compute?.balance || compute?.paused) { setSettings(true); return; }
+    action('runs', { request_id: crypto.randomUUID() });
+  };
+  const latest = compute?.runs.find(r => r.id === compute.active_run) || compute?.runs.find(r => r.status === 'completed') || compute?.runs[0];
+  return <section className="agent-workspace" data-testid="hub-integrated-overview">
+    <header className="agent-workspace-bar"><div><Radio size={13} /><span data-testid="agent-workspace-heading">AGENT WORKSPACE</span><span className="workspace-mode" data-testid="hub-compute-mode">{compute?.mode === 'creator' ? 'CREATOR AGENT' : 'COMMUNITY AGENT'}</span></div><div className="workspace-actions"><span className={`workspace-status ${running ? 'active' : ''}`} data-testid="agent-workspace-status"><i />{running ? 'RESEARCHING' : compute?.paused ? 'PAUSED' : 'STANDBY'}</span><button className="agent-run-button" data-testid="run-research-button" disabled={!compute?.can_manage || !compute?.runnable || running || !!busy || !compute?.remaining_daily_runs} title={!compute?.remaining_daily_runs ? 'Daily research limit reached' : !compute?.can_manage ? 'Only the token creator can run this agent' : 'Start a token research run'} onClick={run}>{running || busy === 'runs' ? <Loader2 size={12} className="spin" /> : <Play size={11} />}<span>{running ? 'Researching' : 'Run research'}</span></button><button className="agent-settings-button" data-testid="agent-settings-trigger" title="Agent settings" aria-label="Agent settings" onClick={() => setSettings(true)}><Settings2 size={15} /></button></div></header>
+    {(actionError || computeError || error) && <div className="terminal-error" role="alert" data-testid="compute-action-error"><p>{actionError || computeError || error}</p><button data-testid="compute-error-retry" onClick={() => { setActionError(''); reloadCompute(); reload(); }}><RefreshCw size={12} />Retry</button></div>}
+    <div className="agent-terminal-grid">
+      <div className="agent-identity-column"><AgentProfileSummary agent={agent} compute={compute} /><AgentActivityFeed data={compute} /><CommunityTerminal posts={posts} error={postError} /></div>
+      <div className="agent-research-column"><ResearchTerminal data={compute} token={token} latest={latest} /><EventIdeas run={latest} /><ResearchArchive data={compute} token={token} latest={latest} /></div>
+      <div className="agent-market-column"><AgentMarketTerminal token={token} /><EventRadar token={token} events={events} error={eventError} /></div>
     </div>
-    <div className="compute-bottom-grid"><ResearchActivity data={compute} token={token} />{compute && <BudgetEstimator key={compute.model_id} data={compute} modelId={compute.model_id} action={action} busy={busy} />}</div>
+    <AgentSettings open={settings} onClose={() => setSettings(false)} data={compute} busy={busy} action={action} token={token} error={actionError} />
   </section>;
 };

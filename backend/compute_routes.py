@@ -8,6 +8,7 @@ from core import db, now, user
 from compute_catalog import UNIT, RATES, FREQUENCIES, catalog, estimate, TARIFF_VERSION
 from compute_store import account, context, authorize, event, log, recover_stale
 from compute_runner import prepare, execute
+from compute_presentation import public_activity, public_run
 
 router = APIRouter(prefix='/api', tags=['compute'])
 
@@ -47,6 +48,12 @@ class RunView(BaseModel):
     snapshot_at: str | None = None
     tariff_version: str | None = None
     mode: str | None = None
+    language: str | None = None
+    display_output: str = ''
+    display_language: str = 'en'
+    translation_pending: bool = False
+    sections: dict = Field(default_factory=dict)
+    observations: dict = Field(default_factory=dict)
 
 class ComputeView(BaseModel):
     token: str
@@ -96,7 +103,8 @@ async def view(mint: str, authorization: str = Header('')):
         **money, runs_completed=acc['runs_completed'], remaining_daily_runs=max(0, 5 - acc['day_runs']),
         active_run=acc['active_run'], manual_completed=acc.get('manual_model') == profile['model_id'],
         paused=acc['paused'], schedule={k: v for k, v in acc['schedule'].items() if k != 'authorized_by'},
-        ledger=ledger, activity=list(reversed(acc['activity'])), runs=runs, tariff_version=TARIFF_VERSION)
+        ledger=ledger, activity=public_activity(list(reversed(acc['activity']))),
+        runs=[public_run(row) for row in runs], tariff_version=TARIFF_VERSION)
 
 @router.post('/tokens/{mint}/compute/topup', response_model=ComputeView)
 async def topup(mint: str, body: TopUp, authorization: str = Header('')):
@@ -107,24 +115,24 @@ async def topup(mint: str, body: TopUp, authorization: str = Header('')):
     result = await db.compute_accounts.update_one({'token': mint, 'ledger.id': {'$ne': body.request_id},
         'funded': {'$lte': 1000 * UNIT - amount}}, {'$inc': {'balance': amount, 'funded': amount},
         '$push': {'ledger': {'$each': [entry], '$slice': -500},
-        'activity': {'$each': [event('credit', f'{body.amount} CR kredit uji ditambahkan')], '$slice': -150}}})
+        'activity': {'$each': [event('credit', f'{body.amount} CR test credits added')], '$slice': -150}}})
     if not result.modified_count:
         acc = await account(mint)
         if not any(x['id'] == body.request_id for x in acc['ledger']):
-            raise HTTPException(409, 'Batas total pengisian kredit uji token ini adalah 1.000 CR.')
+            raise HTTPException(409, 'This token has reached its total test funding limit of 1,000 CR.')
     return await view(mint, authorization)
 
 @router.patch('/tokens/{mint}/compute/limits', response_model=ComputeView)
 async def limits(mint: str, body: Limits, authorization: str = Header('')):
     await authorize(mint, authorization)
     acc = await account(mint)
-    if acc['active_run']: raise HTTPException(409, 'Tunggu riset selesai sebelum mengubah batas.')
-    if body.per_run_limit > body.daily_limit: raise HTTPException(422, 'Batas per riset tidak boleh melebihi batas harian.')
+    if acc['active_run']: raise HTTPException(409, 'Wait for the active research to finish before changing limits.')
+    if body.per_run_limit > body.daily_limit: raise HTTPException(422, 'The per-run limit cannot exceed the daily limit.')
     changes = {'per_run_limit': round(body.per_run_limit * UNIT), 'daily_limit': round(body.daily_limit * UNIT), 'paused': body.paused}
     if body.paused: changes.update({'schedule.enabled': False, 'schedule.next_run_at': None})
     result = await db.compute_accounts.update_one({'token': mint, 'active_run': None}, {'$set': changes})
-    if not result.matched_count: raise HTTPException(409, 'Riset baru dimulai. Coba lagi setelah selesai.')
-    await log(mint, 'settings', 'Batas biaya diperbarui' + (' · Agent dijeda' if body.paused else ''))
+    if not result.matched_count: raise HTTPException(409, 'Research just started. Try again once it finishes.')
+    await log(mint, 'settings', 'Operating limits updated' + (' · Agent paused' if body.paused else ''))
     return await view(mint, authorization)
 
 @router.post('/tokens/{mint}/compute/runs', response_model=RunView, status_code=202)
@@ -133,13 +141,13 @@ async def run(mint: str, body: Operation, tasks: BackgroundTasks, authorization:
     await recover_stale()
     result, fresh = await prepare(mint, body.request_id)
     if fresh: tasks.add_task(execute, result['id'])
-    return result
+    return public_run(result)
 
 @router.get('/tokens/{mint}/compute/runs/{run_id}', response_model=RunView)
 async def get_run(mint: str, run_id: str):
     result = await db.compute_runs.find_one({'token': mint, 'id': run_id}, {'_id': 0, 'prompt': 0, 'system': 0})
-    if not result: raise HTTPException(404, 'Riset tidak ditemukan untuk token ini.')
-    return result
+    if not result: raise HTTPException(404, 'Research was not found for this token.')
+    return public_run(result)
 
 @router.patch('/tokens/{mint}/compute/schedule', response_model=ComputeView)
 async def schedule(mint: str, body: Schedule, authorization: str = Header('')):
@@ -148,12 +156,12 @@ async def schedule(mint: str, body: Schedule, authorization: str = Header('')):
     _, agent, profile = await context(mint)
     if body.enabled:
         if acc.get('manual_model') != profile['model_id']:
-            raise HTTPException(409, 'Jalankan satu riset manual yang berhasil dengan model ini terlebih dahulu.')
-        if acc['paused'] or not acc['balance']: raise HTTPException(409, 'Agent harus aktif dan memiliki kredit sebelum jadwal diaktifkan.')
-        if profile['model_id'] not in RATES: raise HTTPException(409, 'Model belum terhubung.')
+            raise HTTPException(409, 'Complete a successful manual research run with this model first.')
+        if acc['paused'] or not acc['balance']: raise HTTPException(409, 'The agent must be active and funded before scheduling can be enabled.')
+        if profile['model_id'] not in RATES: raise HTTPException(409, 'The model is not connected.')
     start = now() + timedelta(hours=FREQUENCIES[body.frequency])
     value = {**body.model_dump(), 'next_run_at': start.isoformat() if body.enabled else None,
              'authorized_by': operator, 'expires_at': (now() + timedelta(days=7, hours=1)).isoformat()}
     await db.compute_accounts.update_one({'token': mint}, {'$set': {'schedule': value}})
-    await log(mint, 'schedule', f'Jadwal {body.frequency} ' + ('diaktifkan · masa uji 7 hari' if body.enabled else 'dijeda'))
+    await log(mint, 'schedule', f'Research schedule ({body.frequency}) ' + ('enabled for a 7-day trial' if body.enabled else 'paused'))
     return await view(mint, authorization)

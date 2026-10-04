@@ -6,6 +6,7 @@ from core import db, user, now, uid
 from hubs import get_hub
 from chain import current_authority
 from agent_schema import AgentProfile, PublicAgentProfile, MODELS, CAPABILITIES
+from compute_presentation import public_activity
 
 router = APIRouter(prefix='/api', tags=['agent-profiles'])
 
@@ -71,7 +72,7 @@ async def agent(mint: str):
     return AgentView(profile=public, model=next((m for m in MODELS if public and m['id'] == public.model_id), None),
         published=bool(row), source=row.get('source', 'verified-authority') if row else 'community-test',
         execution_enabled=public.model_id in RATES and not acc['paused'],
-        updated_at=row.get('updated_at') if row else None, activity=list(reversed(acc['activity'][-10:])), ecosystem=ecosystem,
+        updated_at=row.get('updated_at') if row else None, activity=public_activity(list(reversed(acc['activity'][-10:]))), ecosystem=ecosystem,
         compute={'status': 'running' if acc['active_run'] else 'paused' if acc['paused'] else 'ready',
                  'credits': acc['balance'] / UNIT, 'runs': acc['runs_completed']})
 

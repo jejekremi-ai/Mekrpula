@@ -1,0 +1,56 @@
+{
+  "summary": "Completed backend+frontend regression for agent-first token hub on FARTCOIN/BONK, including one real manual run, archive-English integrity checks, mobile overflow checks, settings-only financial controls validation, and route/state verification.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "CommunityTerminal",
+        "issue": "Community panel shows backend Not Found error instead of post list/empty state because frontend calls /api/posts?token=...",
+        "selector": "[data-testid=community-terminal], [data-testid=terminal-community-error]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Token hub community feed load",
+        "issue": "HubOverview uses /posts?token={mint}; backend supports /tokens/{mint}/posts. This produces 404 and user-visible 'Not Found' in Community terminal.",
+        "affected_selectors": [
+          "[data-testid=community-terminal]",
+          "[data-testid=terminal-community-error]"
+        ]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_compute_public_workspace_iteration10.py",
+    "/app/test_reports/pytest/pytest_results_iteration10_backend.xml"
+  ],
+  "action_items": [
+    "Fix frontend community API path in HubOverview from `/posts?token=${token.address}` to `/tokens/${token.address}/posts`.",
+    "Re-test community terminal on desktop+mobile after endpoint fix to confirm real empty state/message rendering replaces 404 Not Found.",
+    "Keep agent-first flow unchanged: no report modal/no run-click-to-read behavior and settings-only financial controls are currently correct."
+  ],
+  "critical_code_review_comments": [
+    "Public compute payload hygiene is correct: compute view omits prompt/system and exposes display_output/display_language for safe public rendering.",
+    "Archive migration integrity is correct for historical non-English runs: translation_original_hash equals sha256(original output) and output_en is present.",
+    "Community integration bug root cause is deterministic in code: `useData(`/posts?token=${token.address}`)` in HubOverview mismatches backend route contract."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_compute_public_workspace_iteration10.py",
+    "/app/test_reports/iteration_10.json",
+    "/app/test_reports/pytest/pytest_results_iteration10_backend.xml"
+  ],
+  "success_rate": {
+    "backend": "100% (3/3 pytest tests passed)",
+    "frontend": "93% (all requested core flows passed except Community terminal integration)"
+  },
+  "seed_data_creation": "No seeded fake activity was created in canonical token DB. Exactly one real manual FARTCOIN run was triggered (run_id=0576f14ec8c0fdaecfc2903e6f217d69).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Verified: default visible inline English report without modal click, removed legacy testids, one real run streamed inline and completed with queued/observe/research/proposal/completed activity kinds, BONK zero-balance Run research opens settings and does not create run, settings tabs/limits/topup/usage are modal-only, mobile 390x844 has zero horizontal overflow (scrollWidth==innerWidth), Event radar and market panes are full-width on mobile, Community panel is visible (display:block) but currently shows Not Found due API path mismatch.",
+  "rca of the issue": "Repro: open /token/9BB6... and inspect Community terminal; it displays Not Found. API proof: GET /api/posts?token=9BB6... returns 404, while GET /api/tokens/9BB6.../posts returns 200. RCA: frontend HubOverview uses incorrect endpoint for posts (`/posts?token=`) while backend route contract is token-scoped (`/tokens/{mint}/posts`). Mitigation: update frontend data hook path and re-run desktop/mobile community checks."
+}

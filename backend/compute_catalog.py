@@ -27,12 +27,12 @@ def catalog():
 
 def cost_units(model, inputs, outputs):
     if model not in RATES:
-        raise HTTPException(422, 'Provider model ini belum terhubung. Model tidak akan diganti otomatis.')
+        raise HTTPException(422, 'This model provider is not connected. The selected model will not be substituted.')
     return math.ceil(inputs * RATES[model][2] + outputs * RATES[model][3])
 
 def estimate(model, frequency):
     if frequency not in FREQUENCIES:
-        raise HTTPException(422, 'Frekuensi tidak valid.')
+        raise HTTPException(422, 'Invalid frequency.')
     run = cost_units(model, 2500, 800) / UNIT
     maximum = cost_units(model, MAX_PROMPT_BYTES + 256, MAX_OUTPUT) / UNIT
     daily = 24 / FREQUENCIES[frequency]

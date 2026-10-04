@@ -1,0 +1,45 @@
+{
+  "summary": "Targeted follow-up completed for iteration10 HIGH community bug. Verified corrected frontend posts route integration, real empty-state behavior, and token-isolated community rendering with browser-only fixtures.",
+  "final_bug_status": "FIXED_VERIFIED: CommunityTerminal no longer calls legacy /api/posts?token route; corrected /api/tokens/{mint}/posts route returns 200 and renders expected UI states.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_community_posts_route_regression_iteration11.py",
+    "/app/test_reports/pytest/pytest_results_iteration11_backend.xml"
+  ],
+  "screenshots": [
+    "/app/test_reports/iteration11-community-terminal-desktop-1920x800.jpeg",
+    "/app/test_reports/iteration11-community-terminal-mobile-390x844.jpeg"
+  ],
+  "action_items": [
+    "Keep `useData(`/tokens/${token.address}/posts`)` unchanged to prevent regression to legacy 404 path.",
+    "Retain iteration11 backend regression test in CI for route-contract protection."
+  ],
+  "critical_code_review_comments": [
+    "HubOverview posts data hook now correctly matches backend social route contract (`GET /api/tokens/{mint}/posts`).",
+    "No hardcoded localhost/internal API usage detected in this fix path; frontend remains env-driven via REACT_APP_BACKEND_URL.",
+    "Community terminal handles true empty tokens gracefully (`No community posts yet.`) instead of surfacing backend 404 errors."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_community_posts_route_regression_iteration11.py",
+    "/app/test_reports/iteration_11.json",
+    "/app/test_reports/pytest/pytest_results_iteration11_backend.xml"
+  ],
+  "success_rate": {
+    "backend": "100% (4/4 pytest tests passed)",
+    "frontend": "100% (targeted scope passed)"
+  },
+  "seed_data_creation": "None. No DB seed writes performed.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Scope was intentionally narrow: only community route fix verification and related UI integration checks were executed. Browser fixture data was TEST-LEVEL ONLY and discarded after run.",
+  "rca of the issue": "RCA from iteration10 confirmed and now resolved: frontend requested `/api/posts?token={mint}` (undefined route) causing 404 in Community terminal. After changing HubOverview to `/api/tokens/{mint}/posts`, real traffic showed corrected path with HTTP 200, no legacy route hits, and proper empty-state rendering on BONK.",
+  "test_fixture_note": "BROWSER-ONLY FIXTURE USED (TEST-LEVEL, DISCARDED): intercepted `/api/tokens/*/posts` responses to validate long-post rendering, horizontal overflow behavior, and cross-token isolation without mutating real backend data."
+}

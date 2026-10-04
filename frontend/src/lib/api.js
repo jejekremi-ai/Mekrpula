@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 export const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+const publicErrors = {
+  'Hanya kreator terverifikasi yang dapat mengoperasikan agent resmi token ini.': 'Only the verified creator can operate this token’s official agent.',
+  'Agent komunitas hanya tersedia dalam mode kredit uji.': 'Community research is available only in internal test mode.',
+};
 export async function api(path, options = {}) {
   const token = sessionStorage.getItem('mart-session');
   const form = options.body instanceof FormData;
   const response = await fetch(`${API}${path}`, { ...options, headers: { ...(form ? {} : { 'Content-Type': 'application/json' }), ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers }, body: options.body ? (form ? options.body : JSON.stringify(options.body)) : undefined });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) { const e = new Error(typeof data.detail === 'string' ? data.detail : data.detail?.[0]?.msg || 'Something went wrong. Please try again.'); e.status = response.status; throw e; }
+  if (!response.ok) { const detail = typeof data.detail === 'string' ? data.detail : data.detail?.[0]?.msg || 'Something went wrong. Please try again.'; const e = new Error(publicErrors[detail] || detail); e.status = response.status; throw e; }
   return data;
 }
 export function useData(path) {

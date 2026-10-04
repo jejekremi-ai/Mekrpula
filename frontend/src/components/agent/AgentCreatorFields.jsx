@@ -29,7 +29,7 @@ export const AgentCreatorFields = ({ prefix, enabled, onToggle, profile, onChang
         <Field textarea id={`${prefix}-agent-instructions`} label="Private operating instructions (optional)" maxLength={4000} value={profile.instructions} onChange={e => set('instructions', e.target.value)} placeholder="Voice, boundaries, and details for your agent…" />
         <div className="creator-capabilities">{CAPABILITIES.map(c => <label key={c.id}><input type="checkbox" data-testid={`${prefix}-capability-${c.id}`} checked={profile.capabilities.includes(c.id)} onChange={e => set('capabilities', e.target.checked ? [...profile.capabilities, c.id] : profile.capabilities.filter(k => k !== c.id))} /><c.icon size={13} />{c.name}</label>)}</div>
       </div>}
-      <p className="creator-agent-boundary" data-testid={`${prefix}-agent-notice`}><ShieldCheck size={16} />Model ditetapkan kreator. Riset menggunakan kredit uji per token; jalankan satu riset manual sebelum mengaktifkan jadwal. {selected && !selected.runnable ? 'Provider ini memerlukan API key terpisah dan belum dapat menjalankan riset.' : 'Model siap menjalankan riset.'}</p>
+      <p className="creator-agent-boundary" data-testid={`${prefix}-agent-notice`}><ShieldCheck size={16} />The creator-selected model is fixed. Complete one manual research run before enabling its schedule. {selected && !selected.runnable ? 'This provider needs a separate connection before research can run.' : 'This model is available for research.'}</p>
     </fieldset>}
   </section>;
 };
